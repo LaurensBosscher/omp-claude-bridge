@@ -23,6 +23,8 @@ import {
 	projectPromptCapture,
 	sharedPromptCaptures,
 	type PromptCapture,
+	decodeGlyphPrompt,
+	encodeGlyphPrompt,
 } from "./prompt-capture.js";
 import { collectCarriedAttachments, placeCarriedAttachments, type CarriedAttachment } from "./attachments.js";
 import { createToolServer } from "./mcp-server.js";
@@ -1926,11 +1928,11 @@ function streamClaudeAgentSdk(model: Model<any>, context: Context, options?: Sim
 	let promptCapture: PromptCapture | undefined;
 	let systemPromptAppend: string | undefined;
 	try {
-		promptCapture = promptCaptures.resolveOrDerive(context.systemPrompt);
+		promptCapture = promptCaptures.resolveOrDerive(decodeGlyphPrompt(context.systemPrompt));
 		systemPromptAppend = promptCapture
-			? projectPromptCapture(promptCapture, {
+			? encodeGlyphPrompt(projectPromptCapture(promptCapture, {
 				skillReadTool: mcpTools.some((tool) => tool.name === "read") ? "mcp" : "none",
-			})
+			}))
 			: undefined;
 	} catch (err) {
 		// resolveOrDerive and projectPromptCapture throw to stop a turn that would lose

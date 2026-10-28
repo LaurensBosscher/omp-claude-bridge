@@ -1,4 +1,5 @@
 import type { Skill as OmpSkill } from "@oh-my-pi/pi-coding-agent/extensibility/legacy-pi-coding-agent-shim";
+import { applyGlyphCodec, decodeGlyphText, encodeGlyphText } from "@oh-my-pi/pi-ai";
 import { formatProjectContext } from "./agents-md.js";
 import { debugLogPath } from "./log-paths.js";
 import { renderSkillsBlock, type SkillReadTool } from "./skills.js";
@@ -7,6 +8,29 @@ import { renderSkillsBlock, type SkillReadTool } from "./skills.js";
 // portable parts after Claude Code's own preset.
 
 type Skill = OmpSkill & { disableModelInvocation?: boolean };
+
+// OMP encodes private-use glyphs as `⟦Uxxxx⟧` tokens on the wire to Claude-class models
+// and appends a notice to the first prompt block it changed. Captures are keyed by the
+// raw prompt, so lookups undo that, and the projection is encoded the same way so it
+// stays consistent with the encoded messages. The notice is taken from OMP itself.
+const GLYPH_PROBE = "\uE000";
+const GLYPH_NOTICE = (() => {
+	const probe = applyGlyphCodec({ systemPrompt: [GLYPH_PROBE], messages: [] }).context.systemPrompt;
+	return [probe ?? []].flat()[0].slice(encodeGlyphText(GLYPH_PROBE).length);
+})();
+
+/** The raw prompt behind a glyph-encoded one; unchanged when OMP encoded nothing in it. */
+export function decodeGlyphPrompt(systemPrompt: string | undefined): string | undefined {
+	const at = systemPrompt?.indexOf(GLYPH_NOTICE) ?? -1;
+	if (!systemPrompt || at < 0) return systemPrompt;
+	return decodeGlyphText(systemPrompt.slice(0, at) + systemPrompt.slice(at + GLYPH_NOTICE.length));
+}
+
+/** Encodes a projected prompt the way OMP encodes provider prompts. */
+export function encodeGlyphPrompt(text: string): string {
+	const encoded = encodeGlyphText(text);
+	return encoded === text ? text : `${encoded}${GLYPH_NOTICE}`;
+}
 
 export type PromptCaptureInput = {
 	custom?: string;
