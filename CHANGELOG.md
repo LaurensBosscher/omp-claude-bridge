@@ -4,6 +4,14 @@ All notable changes to this project are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.1] - 2026-11-25
+
+### Fixed
+- Extension fails to load on OMP 19 (`Export named 'keyHint' not found`), so a
+  fresh `omp install` aborts. Key hints use the shim's `keyText`, and the
+  AskClaude renderers return width-wrapped rows instead of pi-tui's removed `Text`.
+  Requires OMP >=19.2.0.
+
 ## [0.10.0] - 2026-11-25
 
 First release of the [LaurensBosscher fork](https://github.com/LaurensBosscher/omp-claude-bridge).

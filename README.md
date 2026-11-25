@@ -10,7 +10,7 @@ This is a maintained fork of [DevVig/omp-claude-bridge](https://github.com/DevVi
 
 ## Install
 
-Requires **OMP >=18.13.2**, **Bun >=1.4.4**, and a working Claude Code login on the machine running OMP. Validation currently targets OMP 18.13.2.
+Requires **OMP >=19.2.0**, **Bun >=1.4.4**, and a working Claude Code login on the machine running OMP. Validation currently targets OMP 19.2.0.
 
 ```bash
 omp install https://github.com/LaurensBosscher/omp-claude-bridge

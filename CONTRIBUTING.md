@@ -12,7 +12,7 @@ bun install        # or: npm install
 ```
 
 Requirements:
-- Bun >= 1.4.4; OMP >= 18.13.2
+- Bun >= 1.4.4; OMP >= 19.2.0
 - [Bun](https://bun.sh) (recommended) or npm
 - An Oh My Pi install for end-to-end testing ([omp.sh](https://omp.sh))
 

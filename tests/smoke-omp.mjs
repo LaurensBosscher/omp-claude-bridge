@@ -19,7 +19,7 @@ delete env.PI_PROFILE;
 try {
 	const run = spawnSync(process.env.OMP_BIN ?? resolve(repo, "node_modules/.bin/omp"), [
 		"--no-session", "--no-extensions", "-e", resolve(repo, "tests/fixtures/controlled-sdk-extension.ts"),
-		"--no-tools", "--no-lsp", "--no-skills", "--no-rules", "--no-context-files", "--no-title",
+		"--no-lsp", "--no-skills", "--no-rules", "--no-context-files", "--no-title",
 		"--model", "claude-bridge/claude-haiku-4-5", "--mode", "json",
 		"--append-system-prompt", "OMP_SMOKE_POLICY", "-p", "Return the controlled response.",
 	], { cwd: root, env, encoding: "utf8", timeout: 30000, maxBuffer: 4 * 1024 * 1024 });

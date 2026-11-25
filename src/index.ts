@@ -1,10 +1,10 @@
 import { createAssistantMessageEventStream, type AssistantMessage, type AssistantMessageEventStream, type ImageContent, type SimpleStreamOptions, type TextContent, type Tool, type UserMessage } from "@oh-my-pi/pi-coding-agent/extensibility/legacy-pi-ai-shim";
 import { systemPromptText, type Context, type Model } from "./bridge-types.js";
 import { getModels } from "@oh-my-pi/pi-coding-agent/extensibility/legacy-pi-ai-shim";
-import { buildSessionContext, keyHint, type ExtensionAPI, type ExtensionContext, type ExtensionUIContext } from "@oh-my-pi/pi-coding-agent/extensibility/legacy-pi-coding-agent-shim";
+import { buildSessionContext, keyText, type ExtensionAPI, type ExtensionContext, type ExtensionUIContext } from "@oh-my-pi/pi-coding-agent/extensibility/legacy-pi-coding-agent-shim";
 import { query, type EffortLevel, type SDKMessage, type SettingSource } from "@anthropic-ai/claude-agent-sdk";
 import type { Base64ImageSource, ContentBlockParam } from "@anthropic-ai/sdk/resources";
-import { Text } from "@oh-my-pi/pi-tui";
+import { wrap } from "@oh-my-pi/pi-tui/text/width";
 import { createSession, deleteSession, openSession, repairToolPairing } from "cc-session-io";
 import { randomUUID } from "node:crypto";
 import { appendFileSync, mkdirSync, realpathSync, statSync } from "fs";
@@ -2469,6 +2469,11 @@ async function promptAndWait(
 const PREVIEW_MAX_CHARS = 1000;
 const PREVIEW_MAX_LINES = 6;
 
+// OMP 19 renders an object with render(width) as ANSI-styled rows; pi-tui no longer exports Text.
+function wrappedRows(text: string): { render(width: number): string[] } {
+	return { render: (width) => wrap(text, width) };
+}
+
 let askClaudeToolName = "AskClaude";
 
 export default function (pi: ExtensionAPI) {
@@ -2710,12 +2715,12 @@ export default function (pi: ExtensionAPI) {
 				const lines = truncated.split("\n").slice(0, PREVIEW_MAX_LINES);
 				text += theme.fg("muted", `"${lines.join("\n")}"`);
 				if (args.prompt.length > PREVIEW_MAX_CHARS || args.prompt.split("\n").length > PREVIEW_MAX_LINES) text += theme.fg("dim", " …");
-				return new Text(text, 0, 0);
+				return wrappedRows(text);
 			},
 			renderResult(result, { expanded, isPartial }, theme) {
 				if (isPartial) {
 					const status = result.content[0]?.type === "text" ? result.content[0].text : "working...";
-					return new Text(theme.fg("mdLink", "◉ Claude Code ") + theme.fg("muted", status), 0, 0);
+					return wrappedRows(theme.fg("mdLink", "◉ Claude Code ") + theme.fg("muted", status));
 				}
 
 				const details = result.details as { prompt?: string; executionTime?: number; actions?: string; error?: boolean } | undefined;
@@ -2736,11 +2741,11 @@ export default function (pi: ExtensionAPI) {
 					const truncated = body.length > PREVIEW_MAX_CHARS ? body.substring(0, PREVIEW_MAX_CHARS) : body;
 					const lines = truncated.split("\n").slice(0, PREVIEW_MAX_LINES);
 					if (lines.length) text += `\n${theme.fg("toolOutput", lines.join("\n"))}`;
-					if (body.length > PREVIEW_MAX_CHARS || body.split("\n").length > PREVIEW_MAX_LINES) text += `\n${theme.fg("dim", `… (${keyHint("app.tools.expand", "to expand")})`)}`;
+					if (body.length > PREVIEW_MAX_CHARS || body.split("\n").length > PREVIEW_MAX_LINES) text += `\n${theme.fg("dim", `… (${keyText("app.tools.expand")} to expand)`)}`;
 
 				}
 
-				return new Text(text, 0, 0);
+				return wrappedRows(text);
 			},
 			async execute(_id, params, signal, onUpdate, ctx) {
 				if (!askClaudeDeprecationNoticeShown && piMode === "tui") {
