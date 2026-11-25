@@ -37,6 +37,23 @@ describe("syncSharedSession", () => {
 		}
 	});
 
+	// Priors that convert to no records (here a turn aborted before anything streamed) leave
+	// save() with nothing to write. Resuming that id failed the turn with "No conversation found".
+	it("takes the clean-start path when no prior message converts to a record", () => {
+		const cwd = mkdtempSync(join(tmpdir(), "sync-shared-session-"));
+		try {
+			const result = __test.syncSharedSession([
+				{ role: "assistant", content: [], provider: "claude-bridge", timestamp: Date.now() },
+				{ role: "user", content: "Hello", timestamp: Date.now() },
+			], cwd);
+
+			assert.equal(result.sessionId, null, "a rebuild with no records must not resume a session that was never written");
+			assert.equal(__test.getSharedSession(null), null, "a clean start must not create a session state");
+		} finally {
+			rmSync(cwd, { recursive: true, force: true });
+		}
+	});
+
 	// Mid-conversation tool-loadout updates land in the transcript as system messages. They must not inflate the cursor or be imported as history, or the next turn's
 	// reuse check (priors >= cursor) fails and every turn rebuilds the session.
 	it("keeps cursor arithmetic consistent when system messages punctuate the history", () => {

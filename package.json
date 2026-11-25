@@ -1,6 +1,6 @@
 {
 	"name": "omp-claude-bridge",
-	"version": "0.10.1",
+	"version": "0.10.2",
 	"private": false,
 	"description": "Oh My Pi extension that integrates Claude Code via the Claude Agent SDK, with OMP tools, session continuity and selectable context windows.",
 	"keywords": [

@@ -845,6 +845,16 @@ function debugSessionPaths(label: string, cwd: string, jsonlPath: string): void 
 		...(modelId ? { model: modelId } : {}),
 	});
 	convertAndImportMessages(session, priorMessages, customToolNameToSdk, carried);
+	// Nothing Claude Code can replay survived conversion (for example a turn aborted
+	// before anything streamed). save() would write no file, and resuming the id
+	// fails the turn with "No conversation found with session ID". Ported from
+	// DevVig/omp-claude-bridge#3.
+	if (session.messages.length === 0) {
+		debug(`rebuild produced 0 messages from ${priorMessages.length} prior message(s); starting clean`);
+		debug(`syncResult: path=clean-start empty-rebuild`);
+		setSessionStateFor(piSessionId, null);
+		return { sessionId: null };
+	}
 	session.save();
 	// records, not messages: `messages` filters out the attachment records that
 	// carrying an `@file` expansion across a rebuild writes into the same file.

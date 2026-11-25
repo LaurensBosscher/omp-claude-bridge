@@ -4,6 +4,14 @@ All notable changes to this project are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.2] - 2026-11-25
+
+### Fixed
+- A session rebuild whose prior messages all convert to nothing (for example a
+  turn aborted before anything streamed) no longer resumes a session file that
+  was never written, which failed the turn with "No conversation found with
+  session ID". It starts a clean session instead (DevVig PR #3).
+
 ## [0.10.1] - 2026-11-25
 
 ### Fixed
