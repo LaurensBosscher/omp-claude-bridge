@@ -6,12 +6,14 @@ An [Oh My Pi](https://github.com/can1357/oh-my-pi) extension that integrates Cla
 
 This port incorporates [pi-claude-bridge](https://github.com/elidickinson/pi-claude-bridge) through **2026-10-23**, commit [`6aa276a`](https://github.com/elidickinson/pi-claude-bridge/commit/6aa276a1498e5376363f5c1f8cf04bfcaee38c93). See [port details and migration notes](documentation/upstream-sync-2026-10-23.md).
 
+This is a maintained fork of [DevVig/omp-claude-bridge](https://github.com/DevVig/omp-claude-bridge), which has had no feature changes since July 2026. It adds OMP 18 support, the OMP model catalog, subagent session isolation, session-limit fallback and [claude.ai connectors](#claudeai-connectors).
+
 ## Install
 
 Requires **OMP >=18.13.2**, **Bun >=1.4.4**, and a working Claude Code login on the machine running OMP. Validation currently targets OMP 18.13.2.
 
 ```bash
-omp install https://github.com/DevVig/omp-claude-bridge
+omp install https://github.com/LaurensBosscher/omp-claude-bridge
 ```
 
 For a local checkout:
@@ -75,6 +77,20 @@ The legacy delegation tool is **disabled by default and deprecated** upstream. S
 
 The default mode is `read`. `allowFullMode: false` removes and rejects `full`. Full mode lets Claude Code run its own tools with permissions bypassed.
 
+## claude.ai connectors
+
+Ask OMP to sync your Claude connectors (the bundled `sync-claude-mcp-connectors` skill runs it), or run it yourself from the plugin directory:
+
+```bash
+bun ~/.omp/plugins/node_modules/omp-claude-bridge/src/claude-mcp-sync.ts sync
+```
+
+Copies the MCP connectors of your claude.ai account (the ones `claude mcp list` shows as `claude.ai …`) into OMP's user `mcp.json` as `claude-ai-<name>` entries, then run `/mcp reload`. Run it again after adding or removing connectors; it replaces every `claude-ai-*` entry and leaves other entries alone. A connector turned off with `/mcp disable` stays off. Ineligible connectors are skipped and printed.
+
+Each entry calls Anthropic's MCP proxy (`mcp-proxy.anthropic.com/v1/mcp/<server id>`), as Claude Code does, so the connector's own OAuth grant and org settings apply and no per-server login is needed. The `Authorization` header is an OMP `!command` that runs this script's `token` command, which reads `~/.claude/.credentials.json`. Near expiry it runs `claude mcp list` so Claude Code refreshes the token; the bridge never rotates it itself. The entries hold the script's absolute path, so sync again after moving the plugin. The proxy endpoints are Claude Code internals, not a documented API, and may change.
+
+Server instructions are not added to the system prompt. OMP would add every server's instructions to every request, cut at 4,000 characters each. Instead the sync writes each connector's full instructions to an on-demand skill, `~/.omp/agent/skills/claude-ai-<name>/SKILL.md`, which costs only its description until the model reads it. Those entries get `instructions: false` unless the entry already sets `instructions`; set it to `true` to put them back in the prompt. Skills for removed connectors are deleted; skills you write yourself are never touched.
+
 ## Behavior and limitations
 
 - The provider exposes OMP tools over MCP. Claude Code's native tools are disabled; OMP executes the calls and applies its tool policy. Bash without a timeout gets a 120-second default.
@@ -110,4 +126,4 @@ The `tests/int-*` scenarios exercise real Claude Code: they require authenticati
 
 ## Credits and license
 
-Original bridge by [Eli Dickinson](https://github.com/elidickinson/pi-claude-bridge), based on [Prateek Sunal's bridge](https://github.com/prateekmedia/claude-agent-sdk-pi). OMP port and context-window controls by [Jonathan Borgwing](https://github.com/DevVig). MIT; see [LICENSE](LICENSE) and [NOTICE](NOTICE).
+Original bridge by [Eli Dickinson](https://github.com/elidickinson/pi-claude-bridge), based on [Prateek Sunal's bridge](https://github.com/prateekmedia/claude-agent-sdk-pi). OMP port and context-window controls by [Jonathan Borgwing](https://github.com/DevVig). Fork maintained by [Laurens Bosscher](https://github.com/LaurensBosscher). MIT; see [LICENSE](LICENSE) and [NOTICE](NOTICE).

@@ -4,7 +4,20 @@ All notable changes to this project are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.10.0] - 2026-11-25
+
+First release of the [LaurensBosscher fork](https://github.com/LaurensBosscher/omp-claude-bridge).
+Install with `omp install https://github.com/LaurensBosscher/omp-claude-bridge`.
+
+### Added
+- `src/claude-mcp-sync.ts sync` copies the claude.ai account's MCP connectors
+  into OMP's user `mcp.json`, routed through Anthropic's MCP proxy with the
+  Claude Code login. Each connector's server instructions become an on-demand
+  skill instead of always-on system prompt text. The plugin ships a
+  `sync-claude-mcp-connectors` skill, so asking OMP to sync runs it.
+- OMP 18 host imports, models from OMP's catalog, Haiku 5.5's measured context
+  window, developer messages forwarded to Claude Code, per-session subagent state
+  and model fallback on Claude session limits (DevVig PRs #6–#11).
 
 ### Changed
 - Ported the complete pi-claude-bridge runtime through 2026-10-23 (`6aa276a`,

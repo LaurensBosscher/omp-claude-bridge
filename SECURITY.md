@@ -16,8 +16,7 @@ Please **do not** open a public issue for security reports.
 
 Instead, use GitHub's private vulnerability reporting:
 **Security → Report a vulnerability** on
-<https://github.com/DevVig/omp-claude-bridge>, or email the maintainer at
-`jon@learnvig.com`.
+<https://github.com/LaurensBosscher/omp-claude-bridge>.
 
 Include:
 - A description of the issue and its impact.

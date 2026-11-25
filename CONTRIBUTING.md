@@ -6,7 +6,7 @@ sizes are welcome — bug reports, docs fixes, and features alike.
 ## Getting set up
 
 ```bash
-git clone https://github.com/DevVig/omp-claude-bridge.git
+git clone https://github.com/LaurensBosscher/omp-claude-bridge.git
 cd omp-claude-bridge
 bun install        # or: npm install
 ```
